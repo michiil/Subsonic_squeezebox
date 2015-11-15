@@ -31,7 +31,7 @@ sub initPlugin {
 	my $class = shift;
 
 	if (main::WEBUI) {
-		require Plugins::SUBSONIC::Settings;
+		require Plugins::Subsonic::Settings;
 		Plugins::Subsonic::Settings->new();
 	}
 
