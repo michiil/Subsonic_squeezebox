@@ -10,24 +10,10 @@ use JSON::XS::VersionOneAndTwo;
 use URI::Escape qw(uri_escape_utf8);
 use Digest::MD5 qw(md5_hex);
 
-use constant DEFAULT_EXPIRY   => 86400 * 30;
-use constant EDITORIAL_EXPIRY => 60 * 60;       # editorial content like recommendations, new releases etc.
-use constant URL_EXPIRY       => 60 * 10;       # Streaming URLs are short lived
-use constant USER_DATA_EXPIRY => 60;            # user want to see changes in purchases, playlists etc. ASAP
-
-use constant DEFAULT_LIMIT  => 200;
-use constant USERDATA_LIMIT => 500;				# users know how many results to expect - let's be a bit more generous :-)
-
-use constant STREAMING_MP3  => 5;
-use constant STREAMING_FLAC => 6;
-use constant STREAMING_FLAC_HIRES => 27;
-
 use Slim::Utils::Cache;
 use Slim::Utils::Log;
 use Slim::Utils::Prefs;
 
-# bump the second parameter if you decide to change the schema of cached data
-my $cache = Slim::Utils::Cache->new('subsonic', 6);
 my $prefs = preferences('plugin.subsonic');
 my $log = logger('plugin.subsonic');
 
@@ -205,11 +191,11 @@ sub _get {
 		sub {
 			my ($http, $error) = @_;
 
-			# login failed due to invalid username/password: delete password and salt
-			#if $error =~ /^40/ {
-			#	$prefs->remove('passtoken');
-			#	$prefs->remove('salt');
-			#}
+			#login failed due to invalid username/password: delete password and salt
+			if ($error =~ /^40/) {
+				$prefs->remove('passtoken');
+				$prefs->remove('salt');
+			}
 
 			$log->warn("Error: $error");
 			$cb->();
