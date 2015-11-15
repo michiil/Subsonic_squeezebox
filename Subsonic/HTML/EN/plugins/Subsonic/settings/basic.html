@@ -1,0 +1,24 @@
+﻿[% PROCESS settings/header.html %]
+
+	[% WRAPPER setting title="PLUGIN_SUBSONIC" desc="" %]
+		<div class="prefDesc">[% "PLUGIN_SUBSONIC_PREFS" | string %]</div>
+	[% END %]
+
+	[% WRAPPER settingSection %]
+		[% WRAPPER settingGroup title="PLUGIN_SUBSONIC_PREFS_SERVER" desc="" %]<input type="text" class="stdedit" name="baseurl" id="basurl" value="[% prefs.baseurl %]" size="20" />[% END %]
+		[% WRAPPER settingGroup title="PLUGIN_SUBSONIC_PREFS_USER" desc="" %]<input type="text" class="stdedit" name="username" id="username" value="[% prefs.username %]" size="20" />[% END %]
+		[% WRAPPER settingGroup title="PLUGIN_SUBSONIC_PREFS_PASSWORD" desc="" %]<input type="password" class="stdedit" name="password" id="password" value="[% prefs.passtoken %]" size="20" />[% END %]
+
+		[% WRAPPER settingGroup title="PLUGIN_SUBSONIC_PREFS_BITRATE" desc="" %]
+			<select name="bitrate" id="bitrate">
+				<option [% prefs.bitrate == "96" ? "selected" : "" %] value="96" >96 kbps</option>
+				<option [% prefs.bitrate == "128" ? "selected" : "" %] value="128" >128 kbps</option>
+				<option [% prefs.bitrate == "192" ? "selected" : "" %] value="192" >192 kbps</option>
+				<option [% prefs.bitrate == "256" ? "selected" : "" %] value="256" >256 kbps</option>
+			  <option [% prefs.bitrate == "320" ? "selected" : "" %] value="320" >320 kbps</option>
+				<option [% prefs.bitrate == "0" ? "selected" : "" %] value="0" >MAX</option>
+			</select>
+		[% END %]
+	[% END %]
+
+[% PROCESS settings/footer.html %]

@@ -1,0 +1,28 @@
+# String file for Qobuz plugin
+
+PLUGIN_SUBSONIC
+	EN	Subsonic
+
+PLUGIN_SUBSONIC_DESC
+	EN	Plugin to listen to Subsonic
+
+PLUGIN_SUBSONIC_REQUIRES_SETTINGS
+	EN	Please enter Subsonic sever, username and password in Server Settings/Advanced/Subsonic.
+
+PLUGIN_SUBSONIC_PREFS
+	EN	Preferences
+
+PLUGIN_SUBSONIC_PREFS_SERVER
+	EN	Server
+
+PLUGIN_SUBSONIC_PREFS_USER
+	EN	Username
+
+PLUGIN_SUBSONIC_PREFS_PASSWORD
+	EN	Password
+
+PLUGIN_SUBSONIC_PREFS_BITRATE
+	EN	Max Bitrate
+
+PLUGIN_SUBSONIC_PLAYLISTS
+	EN	Playlists
