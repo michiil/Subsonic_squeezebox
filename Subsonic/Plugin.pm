@@ -97,10 +97,10 @@ sub handleFeed {
 			name => cstring($client, 'PLUGIN_SUBSONIC_PLAYLISTS'),
 			url  => \&SubsonicPlaylists,
 			image => 'html/images/playlists.png'
-#		},{
-#			name => cstring($client, 'PLUGIN_SUBSONIC_ARTISTS'),
-#			url  => \&SubsonicArtists,
-#			image => 'html/images/artists.png',
+		},{
+			name => cstring($client, 'PLUGIN_SUBSONIC_ARTISTS'),
+			url  => \&SubsonicArtists,
+			image => 'html/images/artists.png',
 		}] : [{
 			name => cstring($client, 'PLUGIN_SUBSONIC_REQUIRES_SETTINGS'),
 			type => 'textarea',
@@ -131,30 +131,30 @@ sub _playlistCallback {
 	} );
 }
 
-#sub SubsonicArtists {
-#	my ($client, $cb, $params, $args) = @_;
-#
-#	Plugins::Subsonic::API->getArtists(sub {
-#		_artistCallback(shift, $cb, undef, $params->{isWeb});
-#	});
-#}
+sub SubsonicArtists {
+	my ($client, $cb, $params, $args) = @_;
 
-#sub _artistCallback {
-#	my ($searchResult, $cb, $showOwner, $isWeb) = @_;
-#
-#	my $artists = [];
-#
-#	for my $index ( @{$searchResult->{'subsonic-response'}->{'artists'}->{'index'}} ) {
-#		for my $artist ( @{$index->{'artist'}} ) {
-#			next if defined $artist->{'albumCount'} && !$artist->{'albumCount'};
-#			push @$artist, _artistItem($artist);
-#		}
-#	}
-#
-#	$cb->( {
-#		items => $artists
-#	} );
-#}
+	Plugins::Subsonic::API->getArtists(sub {
+		_artistCallback(shift, $cb, undef, $params->{isWeb});
+	});
+}
+
+sub _artistCallback {
+	my ($searchResult, $cb, $showOwner, $isWeb) = @_;
+
+	my $artists = [];
+
+	for my $index ( @{$searchResult->{'subsonic-response'}->{'artists'}->{'index'}} ) {
+		for my $artist ( @{$index->{'artist'}} ) {
+			next if defined $artist->{'albumCount'} && !$artist->{'albumCount'};
+			push @$artists, _artistItem($artist);
+		}
+	}
+
+	$cb->( {
+		items => $artists
+	} );
+}
 
 sub SubsonicPlaylistGetTracks {
 	my ($client, $cb, $params, $args) = @_;
@@ -180,6 +180,54 @@ sub SubsonicPlaylistGetTracks {
 	}, $playlistId);
 }
 
+sub SubsonicAlbumGetTracks {
+	my ($client, $cb, $params, $args) = @_;
+	my $albumId = $args->{album_id};
+
+	Plugins::Subsonic::API->getAlbumTracks(sub {
+		my $album = shift;
+
+		if (!$album) {
+			$log->error("Get album ($albumId) failed");
+			return;
+		}
+
+		my $tracks = [];
+
+		foreach my $track (@{$album->{'subsonic-response'}->{'album'}->{'song'} }) {
+			push @$tracks, _trackItem($client, $track);
+		}
+
+		$cb->({
+			items => $tracks,
+		}, @_ );
+	}, $albumId);
+}
+
+sub SubsonicArtistGetAlbums {
+	my ($client, $cb, $params, $args) = @_;
+	my $artistId = $args->{artist_id};
+
+	Plugins::Subsonic::API->getArtistAlbums(sub {
+		my $artist = shift;
+
+		if (!$artist) {
+			$log->error("Get artist ($artistId) failed");
+			return;
+		}
+
+		my $albums = [];
+
+		foreach my $album (@{$artist->{'subsonic-response'}->{'artist'}->{'album'} }) {
+			push @$albums, _albumItem($client, $album);
+		}
+
+		$cb->({
+			items => $albums,
+		}, @_ );
+	}, $artistId);
+}
+
 sub _playlistItem {
 	my ($playlist) = @_;
 
@@ -199,6 +247,22 @@ sub _playlistItem {
 	};
 }
 
+sub _artistItem {
+	my ($artist) = @_;
+
+	my $image = Plugins::Subsonic::API->getcoverArt($artist->{'coverArt'}) || 'html/images/playlists.png';
+
+	return {
+		name  => $artist->{'name'},
+		url   => \&SubsonicArtistGetAlbums,
+		image => $image,
+		passthrough => [{
+			artist_id  => $artist->{'id'},
+		}],
+		type  => 'artist',
+	};
+}
+
 sub _trackItem {
 	my ($client, $track) = @_;
 
@@ -215,6 +279,22 @@ sub _trackItem {
 		play	=> $streamUrl,
 		on_select => 'play',
 		playall		=> 1,
+	};
+}
+
+sub _albumItem {
+	my ($client, $album) = @_;
+
+	my $image = Plugins::Subsonic::API->getcoverArt($album->{'coverArt'}) || 'html/images/playlists.png';
+
+	return {
+		name  => $album->{'name'},
+		url   => \&SubsonicAlbumGetTracks,
+		image => $image,
+		passthrough => [{
+			album_id  => $album->{'id'},
+		}],
+		type  => 'album',
 	};
 }
 

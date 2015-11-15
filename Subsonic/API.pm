@@ -72,20 +72,19 @@ sub getPlaylists {
 	});
 }
 
-#sub getArtists {
-#	my ($class, $cb, $user) = @_;
-#
-#	_get('rest/getArtists.view', sub {
-#		my $artists = shift;
-#
-#		$cb->($artists);
-#	}, {
-#		u						=> $prefs->get('username'),
-#		t						=> $prefs->get('passtoken'),
-#		s						=> $prefs->get('salt'),
-#		_ttl        => USER_DATA_EXPIRY,
-#	});
-#}
+sub getArtists {
+	my ($class, $cb, $user) = @_;
+
+	_get('rest/getArtists.view', sub {
+		my $artists = shift;
+
+		$cb->($artists);
+	}, {
+		u						=> $prefs->get('username'),
+		t						=> $prefs->get('passtoken'),
+		s						=> $prefs->get('salt'),
+	});
+}
 
 sub getPlaylistTracks {
 	my ($class, $cb, $playlistId) = @_;
@@ -96,6 +95,36 @@ sub getPlaylistTracks {
 		$cb->($tracks);
 	},{
 		id					=> $playlistId,
+		u						=> $prefs->get('username'),
+		t						=> $prefs->get('passtoken'),
+		s						=> $prefs->get('salt'),
+	});
+}
+
+sub getAlbumTracks {
+	my ($class, $cb, $albumId) = @_;
+
+	_get('rest/getAlbum.view', sub {
+		my $tracks = shift;
+
+		$cb->($tracks);
+	},{
+		id					=> $albumId,
+		u						=> $prefs->get('username'),
+		t						=> $prefs->get('passtoken'),
+		s						=> $prefs->get('salt'),
+	});
+}
+
+sub getArtistAlbums {
+	my ($class, $cb, $artistId) = @_;
+
+	_get('rest/getArtist.view', sub {
+		my $artist = shift;
+
+		$cb->($artist);
+	},{
+		id					=> $artistId,
 		u						=> $prefs->get('username'),
 		t						=> $prefs->get('passtoken'),
 		s						=> $prefs->get('salt'),
@@ -184,7 +213,7 @@ sub _get {
 			my $result = eval { from_json($response->content) };
 
 			$@ && $log->error($@);
-			main::DEBUGLOG && $log->is_debug && $url !~ /getFileUrl/i && $log->debug(Data::Dump::dump($result));
+			#main::DEBUGLOG && $log->is_debug && $url !~ /getFileUrl/i && $log->debug(Data::Dump::dump($result));
 
 			$cb->($result);
 		},
