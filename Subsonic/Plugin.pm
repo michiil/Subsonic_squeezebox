@@ -10,7 +10,6 @@ use Slim::Utils::Prefs;
 use Slim::Utils::Strings qw(string cstring);
 
 use Plugins::Subsonic::API;
-use Plugins::Subsonic::ProtocolHandler;
 
 my $prefs = preferences('plugin.subsonic');
 
@@ -35,43 +34,9 @@ sub initPlugin {
 		Plugins::Subsonic::Settings->new();
 	}
 
-	Slim::Player::ProtocolHandlers->registerHandler(
-		subsonic => 'Plugins::Subsonic::ProtocolHandler'
-	);
 
-	Slim::Player::ProtocolHandlers->registerIconHandler(
-		qr|\.qobuz\.com/|,
-		sub { $class->_pluginDataFor('icon') }
-	);
-
-	# Track Info item
-	Slim::Menu::TrackInfo->registerInfoProvider( subsonic => (
-		func  => \&trackInfoMenu,
-	) );
-
-	Slim::Menu::ArtistInfo->registerInfoProvider( subsonic => (
-		func => \&artistInfoMenu,
-	) );
-
-	Slim::Menu::AlbumInfo->registerInfoProvider( subsonic => (
-		func => \&albumInfoMenu,
-	) );
-
-	Slim::Menu::GlobalSearch->registerInfoProvider( subsonic => (
-		func => \&searchMenu,
-	) );
-
-	Slim::Control::Request::addDispatch(['subsonic', 'playalbum'], [1, 0, 0, \&cliSubsonicPlayAlbum]);
-	Slim::Control::Request::addDispatch(['subsonic', 'addalbum'], [1, 0, 0, \&cliSubsonicPlayAlbum]);
-
-	# "Local Artwork" requires LMS 7.8+, as it's using its imageproxy.
-	if (CAN_IMAGEPROXY) {
-		require Slim::Web::ImageProxy;
-		Slim::Web::ImageProxy->registerHandler(
-			match => qr/static\.qobuz\.com/,
-			func  => \&_imgProxy,
-		);
-	}
+#	Slim::Control::Request::addDispatch(['subsonic', 'playalbum'], [1, 0, 0, \&cliSubsonicPlayAlbum]);
+#	Slim::Control::Request::addDispatch(['subsonic', 'addalbum'], [1, 0, 0, \&cliSubsonicPlayAlbum]);
 
 	$class->SUPER::initPlugin(
 		feed   => \&handleFeed,
@@ -297,119 +262,5 @@ sub _albumItem {
 		type  => 'album',
 	};
 }
-
-sub trackInfoMenu {
-	my ( $client, $url, $track, $remoteMeta, $tags ) = @_;
-
-	my $artist = $track->remote ? $remoteMeta->{artist} : $track->artistName;
-	my $album  = $track->remote ? $remoteMeta->{album}  : ( $track->album ? $track->album->name : undef );
-	my $title  = $track->remote ? $remoteMeta->{title}  : $track->title;
-
-	my $items;
-
-	if ( my ($trackId) = Plugins::Qobuz::ProtocolHandler->crackUrl($url) ) {
-		my $albumId = $remoteMeta ? $remoteMeta->{albumId} : undef;
-		my $artistId= $remoteMeta ? $remoteMeta->{artistId} : undef;
-
-		if ($trackId || $albumId || $artistId) {
-			my $args = ();
-			if ($artistId && $artist) {
-				$args->{artistId} = $artistId;
-				$args->{artist}   = $artist;
-			}
-
-			if ($trackId && $title) {
-				$args->{trackId} = $trackId;
-				$args->{title}   = $title;
-			}
-
-			if ($albumId && $album) {
-				$args->{albumId} = $albumId;
-				$args->{album}   = $album;
-			}
-
-			$items ||= [];
-			push @$items, {
-				name => cstring($client, 'PLUGIN_QOBUZ_MANAGE_FAVORITES'),
-				url  => \&QobuzManageFavorites,
-				passthrough => [$args],
-			}
-		}
-	}
-
-	return _objInfoHandler( $client, $artist, $album, $title, $items );
-}
-
-sub artistInfoMenu {
-	my ($client, $url, $artist, $remoteMeta, $tags, $filter) = @_;
-
-	return _objInfoHandler( $client, $artist->name );
-}
-
-sub albumInfoMenu {
-	my ($client, $url, $album, $remoteMeta, $tags, $filter) = @_;
-
-	my $albumTitle = $album->title;
-	my @artists;
-	push @artists, $album->artistsForRoles('ARTIST'), $album->artistsForRoles('ALBUMARTIST');
-
-	return _objInfoHandler( $client, $artists[0]->name, $albumTitle );
-}
-
-sub _objInfoHandler {
-	my ( $client, $artist, $album, $track, $items ) = @_;
-
-	$items ||= [];
-
-	my %seen;
-	foreach ($artist, $album, $track) {
-		# prevent duplicate entries if eg. album & artist have the same name
-		next if $seen{$_};
-
-		$seen{$_} = 1;
-
-		push @$items, {
-			name => cstring($client, 'PLUGIN_QOBUZ_SEARCH', $_),
-			url  => \&QobuzSearch,
-			passthrough => [{
-				q => $_,
-			}]
-		} if $_;
-	}
-
-	my $menu;
-	if ( scalar @$items == 1) {
-		$menu = $items->[0];
-		$menu->{name} = cstring($client, 'PLUGIN_ON_QOBUZ');
-	}
-	elsif (scalar @$items) {
-		$menu = {
-			name  => cstring($client, 'PLUGIN_ON_QOBUZ'),
-			items => $items
-		};
-	}
-
-	return $menu if $menu;
-}
-
-sub _imgProxy { if (CAN_IMAGEPROXY) {
-	my ($url, $spec) = @_;
-
-	#main::DEBUGLOG && $log->debug("Artwork for $url, $spec");
-
-	# https://github.com/Qobuz/api-documentation#album-cover-sizes
-	my $size = Slim::Web::ImageProxy->getRightSize($spec, {
-		50 => 50,
-		160 => 160,
-		300 => 300,
-		600 => 600
-	}) || 'max';
-
-	$url =~ s/(\d{13}_)[\dmax]+(\.jpg)/$1$size$2/ if $size;
-
-	#main::DEBUGLOG && $log->debug("Artwork file url is '$url'");
-
-	return $url;
-} }
 
 1;
