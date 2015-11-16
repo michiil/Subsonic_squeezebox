@@ -30,34 +30,6 @@ sub getstreamUrl {
 	return $streamUrl
 }
 
-#sub getArtist {
-#	my ($class, $cb, $artistId) = @_;
-#
-#	_get('rest/getArtist.view', sub {
-#		my $results = shift;
-#		$cb->($results) if $cb;
-#	}, {
-#		id					=> $artistId,
-#		u						=> $prefs->get('username'),
-#		t						=> $prefs->get('passtoken'),
-#		s						=> $prefs->get('salt'),
-#	});
-#}
-
-#sub getAlbum {
-#	my ($class, $cb, $albumId) = @_;
-#
-#	_get('rest/getAlbum.view', sub {
-#		my $album = shift;
-#
-#		($album) = @{_precacheAlbum([$album])} if $album;
-#
-#		$cb->($album);
-#	},{
-#		album_id => $albumId,
-#	});
-#}
-
 sub getPlaylists {
 	my ($class, $cb, $user) = @_;
 
@@ -130,68 +102,6 @@ sub getArtistAlbums {
 		s						=> $prefs->get('salt'),
 	});
 }
-
-#sub getTrackInfo {
-#	my ($class, $cb, $trackId) = @_;
-#
-#	$cb->() unless $trackId;
-#
-#	my $meta = $cache->get('trackInfo_' . $trackId);
-#
-#	if ($meta) {
-#		$cb->($meta);
-#		return $meta;
-#	}
-#
-#	_get('getSong.view', sub {
-#		my $meta = shift;
-#		$meta = _precacheTrack($meta) if $meta;
-#
-#		$cb->($meta);
-#	},{
-#		track_id => $trackId
-#	});
-#}
-
-#sub getFileUrl {
-#	my ($class, $cb, $trackId, $format) = @_;
-#	$class->( $baseurl . 'stream.view' . $urlparams . '&id=' . $trackid );
-#}
-
-#sub getFileInfo {
-#	my ($class, $cb, $trackId, $format, $urlOnly) = @_;
-#
-#	$cb->() unless $trackId;
-#
-#	my $bitrate = $prefs->get('bitrate');
-#
-#	if ( my $cached = $class->getCachedFileInfo($trackId, $urlOnly) ) {
-#		$cb->($cached);
-#		return $cached
-#	}
-#
-#	_get('track/getFileUrl', sub {
-#		my $track = shift;
-#
-#		if ($track) {
-#			my $url = delete $track->{url};
-#
-#			# cache urls for a short time only
-#			$cache->set("trackUrl_${trackId}_$preferredFormat", $url, URL_EXPIRY);
-#			$cache->set("trackId_$url", $trackId, DEFAULT_EXPIRY);
-#			$cache->set("fileInfo_${trackId}_$preferredFormat", $track, DEFAULT_EXPIRY);
-#			$track = $url if $urlOnly;
-#		}
-#
-#		$cb->($track);
-#	},{
-#		track_id   => $trackId,
-#		format_id  => $preferredFormat,
-#		_ttl       => URL_EXPIRY,
-#		_sign      => 1,
-#		_use_token => 1,
-#	});
-#}
 
 sub _get {
 	my ( $url, $cb, $params ) = @_;
