@@ -259,7 +259,7 @@ sub _albumItem {
 		passthrough => [{
 			album_id  => $album->{'id'},
 		}],
-		type  => 'album',
+		type  => 'playlist',
 	};
 }
 
