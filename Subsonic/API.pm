@@ -30,8 +30,22 @@ sub getstreamUrl {
 	return $streamUrl
 }
 
+sub gettrackInfo {
+	my ($class, $cb, $songId) = @_;
+	_get('rest/getSong.view', sub {
+		my $info = shift;
+		#$log->debug($songId);
+		$cb->($info);
+	}, {
+		id					=> $songId,
+		u						=> $prefs->get('username'),
+		t						=> $prefs->get('passtoken'),
+		s						=> $prefs->get('salt'),
+	});
+}
+
 sub getPlaylists {
-	my ($class, $cb, $user) = @_;
+	my ($class, $cb) = @_;
 
 	_get('rest/getPlaylists.view', sub {
 		my $playlists = shift;
@@ -115,6 +129,7 @@ sub _get {
 	}
 
 	$url = $prefs->get('baseurl') . $url . '?v=1.13.0&c=squeezebox&f=json&' . join('&', sort @query);
+	#$log->debug($url);
 
 	Slim::Networking::SimpleAsyncHTTP->new(
 		sub {

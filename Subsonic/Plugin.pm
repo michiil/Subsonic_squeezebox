@@ -10,6 +10,7 @@ use Slim::Utils::Prefs;
 use Slim::Utils::Strings qw(string cstring);
 
 use Plugins::Subsonic::API;
+use Plugins::Subsonic::Metadata;
 
 my $prefs = preferences('plugin.subsonic');
 
@@ -28,6 +29,8 @@ use constant CAN_IMAGEPROXY => (Slim::Utils::Versions->compareVersions($::VERSIO
 
 sub initPlugin {
 	my $class = shift;
+
+	Plugins::Subsonic::Metadata->init();
 
 	if (main::WEBUI) {
 		require Plugins::Subsonic::Settings;
