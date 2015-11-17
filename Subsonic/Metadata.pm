@@ -33,6 +33,7 @@ sub provider {
   my $uri = URI->new($url);
   my %query = $uri->query_form;
   Plugins::Subsonic::API->gettrackInfo(sub { _infoCallback(shift); }, $query{'id'});
+  Slim::Control::Request::notifyFromArray( $client, [ 'newmetadata' ] );
 }
 
 sub _infoCallback {
@@ -46,7 +47,7 @@ sub _infoCallback {
       title   => $info->{'subsonic-response'}->{'song'}->{'title'},
       cover   => $image,
   };
-  $log->debug(Data::Dump::dump($meta));
+  #$log->debug(Data::Dump::dump($meta));
   return $meta
 }
 
