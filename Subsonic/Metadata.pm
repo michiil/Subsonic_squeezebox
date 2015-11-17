@@ -32,12 +32,12 @@ sub provider {
 	my ( $client, $url ) = @_;
   my $uri = URI->new($url);
   my %query = $uri->query_form;
-  Plugins::Subsonic::API->gettrackInfo(sub { _infoCallback(shift); }, $query{'id'});
-  Slim::Control::Request::notifyFromArray( $client, [ 'newmetadata' ] );
+  Plugins::Subsonic::API->gettrackInfo(sub { _infoCallback(shift, $client); }, $query{'id'});
 }
 
 sub _infoCallback {
-	my $info = shift;
+	my ( $info, $client ) = @_;
+  $client = $client->master;
   #$log->debug(Data::Dump::dump($info));
   my $image = Plugins::Subsonic::API->getcoverArt($info->{'subsonic-response'}->{'song'}->{'coverArt'}) || 'html/images/playlists.png';
   #$log->debug($image);
@@ -47,8 +47,9 @@ sub _infoCallback {
       title   => $info->{'subsonic-response'}->{'song'}->{'title'},
       cover   => $image,
   };
-  #$log->debug(Data::Dump::dump($meta));
-  return $meta
+  $log->debug(Data::Dump::dump($meta));
+  $client->pluginData( metadata => $meta );
+  Slim::Control::Request::notifyFromArray( $client, [ 'newmetadata' ] );
 }
 
 
