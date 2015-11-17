@@ -11,12 +11,12 @@
 
 		[% WRAPPER settingGroup title="PLUGIN_SUBSONIC_PREFS_BITRATE" desc="" %]
 			<select name="bitrate" id="bitrate">
-				<option [% prefs.bitrate == "96" ? "selected" : "" %] value="96" >96 kbps</option>
-				<option [% prefs.bitrate == "128" ? "selected" : "" %] value="128" >128 kbps</option>
-				<option [% prefs.bitrate == "192" ? "selected" : "" %] value="192" >192 kbps</option>
-				<option [% prefs.bitrate == "256" ? "selected" : "" %] value="256" >256 kbps</option>
-			  <option [% prefs.bitrate == "320" ? "selected" : "" %] value="320" >320 kbps</option>
 				<option [% prefs.bitrate == "0" ? "selected" : "" %] value="0" >MAX</option>
+			  <option [% prefs.bitrate == "320" ? "selected" : "" %] value="320" >320 kbps</option>
+				<option [% prefs.bitrate == "256" ? "selected" : "" %] value="256" >256 kbps</option>
+				<option [% prefs.bitrate == "192" ? "selected" : "" %] value="192" >192 kbps</option>
+				<option [% prefs.bitrate == "128" ? "selected" : "" %] value="128" >128 kbps</option>
+				<option [% prefs.bitrate == "96" ? "selected" : "" %] value="96" >96 kbps</option>
 			</select>
 		[% END %]
 	[% END %]
