@@ -51,10 +51,8 @@ sub handler {
 			$prefs->set('passtoken', "$passtoken"); # add a leading space to make the message display nicely
 		}
 
-		if ($params->{'bitrate'}) {
-			my $bitrate = $params->{'bitrate'};
-			$prefs->set('bitrate', "$bitrate"); # add a leading space to make the message display nicely
-		}
+		my $bitrate = $params->{'bitrate'};
+		$prefs->set('bitrate', "$bitrate"); # add a leading space to make the message display nicely
 	}
 
 	# This puts the value on the webpage.
