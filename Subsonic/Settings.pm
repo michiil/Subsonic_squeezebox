@@ -8,12 +8,7 @@ use Digest::MD5 qw(md5_hex);
 
 
 # Used for logging.
-my $log = Slim::Utils::Log->addLogCategory({
-	'category'     => 'plugin.subsonic',
-	'defaultLevel' => 'INFO',
-	'description'  => 'Subsonic Settings',
-});
-
+my $log = logger('plugin.subsonic')
 my $prefs = preferences('plugin.subsonic');
 
 sub name {
