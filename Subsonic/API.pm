@@ -16,6 +16,11 @@ use Slim::Utils::Prefs;
 
 my $prefs = preferences('plugin.subsonic');
 my $log = logger('plugin.subsonic');
+my $cache = Slim::Utils::Cache->new('qobuz', 6);
+
+
+use constant DEFAULT_EXPIRY   => 86400 * 30;		# 30 days
+use constant USER_DATA_EXPIRY => 60 * 5;				# 5 minutes; user want to see changes in playlists etc. ASAP
 
 
 sub getcoverArt {
@@ -41,6 +46,7 @@ sub getPlaylists {
 		u						=> $prefs->get('username'),
 		t						=> $prefs->get('passtoken'),
 		s						=> $prefs->get('salt'),
+		_ttl				=> USER_DATA_EXPIRY,
 	});
 }
 
@@ -55,6 +61,7 @@ sub getArtists {
 		u						=> $prefs->get('username'),
 		t						=> $prefs->get('passtoken'),
 		s						=> $prefs->get('salt'),
+		_ttl				=> USER_DATA_EXPIRY,
 	});
 }
 
@@ -70,6 +77,7 @@ sub getPlaylistTracks {
 		u						=> $prefs->get('username'),
 		t						=> $prefs->get('passtoken'),
 		s						=> $prefs->get('salt'),
+		_ttl				=> USER_DATA_EXPIRY,
 	});
 }
 
@@ -85,6 +93,7 @@ sub getAlbumTracks {
 		u						=> $prefs->get('username'),
 		t						=> $prefs->get('passtoken'),
 		s						=> $prefs->get('salt'),
+		_ttl				=> USER_DATA_EXPIRY,
 	});
 }
 
@@ -100,6 +109,7 @@ sub getArtistAlbums {
 		u						=> $prefs->get('username'),
 		t						=> $prefs->get('passtoken'),
 		s						=> $prefs->get('salt'),
+		_ttl				=> USER_DATA_EXPIRY,
 	});
 }
 
@@ -116,6 +126,16 @@ sub _get {
 
 	$url = $prefs->get('baseurl') . $url . '?v=1.13.0&c=squeezebox&f=json&' . join('&', sort @query);
 
+	if ($params->{_wipecache}) {
+		$cache->remove($url);
+	}
+
+	if (!$params->{_nocache} && (my $cached = $cache->get($url))) {
+		main::DEBUGLOG && $log->is_debug && $log->debug("found cached response: " . Data::Dump::dump($cached));
+		$cb->($cached);
+		return;
+	}
+
 	Slim::Networking::SimpleAsyncHTTP->new(
 		sub {
 			my $response = shift;
@@ -124,6 +144,10 @@ sub _get {
 
 			$@ && $log->error($@);
 			#main::DEBUGLOG && $log->is_debug && $url !~ /getFileUrl/i && $log->debug(Data::Dump::dump($result));
+
+			if ($result && !$params->{_nocache}) {
+				$cache->set($url, $result, $params->{_ttl} || DEFAULT_EXPIRY);
+			}
 
 			$cb->($result);
 		},
