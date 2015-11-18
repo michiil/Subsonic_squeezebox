@@ -8,7 +8,7 @@ use Digest::MD5 qw(md5_hex);
 
 
 # Used for logging.
-my $log = logger('plugin.subsonic')
+my $log = logger('plugin.subsonic');
 my $prefs = preferences('plugin.subsonic');
 
 sub name {
