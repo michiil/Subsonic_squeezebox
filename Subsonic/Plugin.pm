@@ -13,10 +13,6 @@ use Plugins::Subsonic::API;
 
 my $prefs = preferences('plugin.subsonic');
 
-$prefs->init({
-	bitrate => 6,
-});
-
 my $log = Slim::Utils::Log->addLogCategory( {
 	category     => 'plugin.subsonic',
 	defaultLevel => 'ERROR',
