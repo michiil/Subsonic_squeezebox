@@ -16,7 +16,7 @@ use Slim::Utils::Prefs;
 
 my $prefs = preferences('plugin.subsonic');
 my $log = logger('plugin.subsonic');
-my $cache = Slim::Utils::Cache->new('qobuz', 6);
+my $cache = Slim::Utils::Cache->new('subsonic', 6);
 
 
 use constant DEFAULT_EXPIRY   => 86400 * 30;		# 30 days
