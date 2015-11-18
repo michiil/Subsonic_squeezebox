@@ -38,8 +38,8 @@ sub defaultMeta {
 	return {
 		title => Slim::Music::Info::getCurrentTitle($url),
 		icon  => ICON,
-		cover => ICON,
 		type  => $client->string('RADIO'),
+		ttl   => time() + 30,
 	};
 }
 
@@ -51,7 +51,7 @@ sub provider {
 	}
 
 	if ( my $meta = $client->master->pluginData('metadata') ) {
-		$log->debug( "Raw Subsonic metadata: " . Data::Dump::dump($meta) );
+
 		if ( $meta->{_url} eq $url ) {
 			$meta->{title} ||= Slim::Music::Info::getCurrentTitle($url);
 
@@ -79,7 +79,7 @@ sub fetchMetadata {
 
 	Slim::Utils::Timers::killTimers( $client, \&fetchMetadata );
 
-	# Make sure client is still playing this station
+	# Make sure client is still playing this song
 	if ( Slim::Player::Playlist::url($client) ne $url ) {
 		main::DEBUGLOG && $log->is_debug && $log->debug( $client->id . " no longer playing $url, stopping metadata fetch" );
 		return;
@@ -95,7 +95,7 @@ sub fetchMetadata {
 
 	main::DEBUGLOG && $log->is_debug && $log->debug( "Fetching Subsonic metadata from $metaUrl" );
 
-	my $http = Slim::Networking::SqueezeNetwork->new(
+	my $http = Slim::Networking::SimpleAsyncHTTP->new(
 		\&_gotMetadata,
 		\&_gotMetadataError,
 		{
@@ -187,6 +187,9 @@ sub _gotMetadataError {
 
 sub parser {
     my ( $client, $url, $metadata ) = @_;
+		if ( main::DEBUGLOG && $log->is_debug ) {
+			$log->debug( "Parser wird gerufen" );
+		}
     return 1;
 }
 
