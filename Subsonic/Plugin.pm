@@ -272,8 +272,11 @@ sub _imgProxy { if (CAN_IMAGEPROXY) {
 
 	my $size = Slim::Web::ImageProxy->getRightSize($spec, {
 		50 => '&size=50',
-		160 => '&size=160',
+		100 => '&size=100',
+		200 => '&size=200',
 		300 => '&size=300',
+		400 => '&size=400',
+		500 => '&size=500',
 		600 => '&size=600'
 	}) || '';
 
