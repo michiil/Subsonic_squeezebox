@@ -126,7 +126,6 @@ sub _gotMetadata {
 	}
 
 	my $meta = defaultMeta( $client, $url );
-	$meta->{_url} = $url;
 
 	my $image = Plugins::Subsonic::API->getcoverArt($feed->{'subsonic-response'}->{'song'}->{'coverArt'}) || 'html/images/playlists.png';
   #$log->debug($image);
@@ -134,7 +133,9 @@ sub _gotMetadata {
       artist  => $feed->{'subsonic-response'}->{'song'}->{'artist'},
       album   => $feed->{'subsonic-response'}->{'song'}->{'album'},
       title   => $feed->{'subsonic-response'}->{'song'}->{'title'},
-      httpCover   => $image,
+      Cover   => $image,
+			icon		=> $image,
+			_url		=> $url,
   };
 
 	if ($meta->{ttl} < time()) {
