@@ -25,7 +25,7 @@ use constant USER_DATA_EXPIRY => 60 * 5;				# 5 minutes; user want to see change
 
 sub getcoverArt {
 	my ($class, $coverID) = @_;
-	my $coverUrl = $prefs->get('baseurl') . 'rest/getCoverArt.view' . '?u=' . $prefs->get('username') . '&t=' . $prefs->get('passtoken') . '&s=' . $prefs->get('salt') . '&v=1.13.0&c=squeezebox&size=400&id=' . $coverID;
+	my $coverUrl = $prefs->get('baseurl') . 'rest/getCoverArt.view' . '?u=' . $prefs->get('username') . '&t=' . $prefs->get('passtoken') . '&s=' . $prefs->get('salt') . '&v=1.13.0&c=squeezebox&id=' . $coverID;
 	return $coverUrl
 }
 
