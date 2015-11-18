@@ -134,7 +134,7 @@ sub _gotMetadata {
       artist  => $feed->{'subsonic-response'}->{'song'}->{'artist'},
       album   => $feed->{'subsonic-response'}->{'song'}->{'album'},
       title   => $feed->{'subsonic-response'}->{'song'}->{'title'},
-      cover   => $image,
+      httpCover   => $image,
   };
 
 	if ($meta->{ttl} < time()) {
