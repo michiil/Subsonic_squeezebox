@@ -106,11 +106,10 @@ sub _gotMetadata {
 		$log->debug( "Raw Subsonic metadata: " . Data::Dump::dump($feed) );
 	}
 
-	my $meta = defaultMeta( $client, $url );
-
 	my $image = Plugins::Subsonic::API->getcoverArt($feed->{'subsonic-response'}->{'song'}->{'coverArt'}) || 'html/images/playlists.png';
-  #$log->debug($image);
-  my $meta = {
+
+	my $meta = defaultMeta( $client, $url );
+  $meta = {
       artist  => $feed->{'subsonic-response'}->{'song'}->{'artist'},
       album   => $feed->{'subsonic-response'}->{'song'}->{'album'},
       title   => $feed->{'subsonic-response'}->{'song'}->{'title'},
