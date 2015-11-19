@@ -13,11 +13,7 @@ use Plugins::Subsonic::API;
 use Plugins::Subsonic::Metadata;
 
 my $prefs = preferences('plugin.subsonic');
-
-$prefs->init({
-	bitrate => 6,
-});
-
+my $regexUrl = quotemeta($prefs->get('baseurl'));
 my $log = Slim::Utils::Log->addLogCategory( {
 	category     => 'plugin.subsonic',
 	defaultLevel => 'ERROR',
@@ -37,9 +33,14 @@ sub initPlugin {
 		Plugins::Subsonic::Settings->new();
 	}
 
-
-#	Slim::Control::Request::addDispatch(['subsonic', 'playalbum'], [1, 0, 0, \&cliSubsonicPlayAlbum]);
-#	Slim::Control::Request::addDispatch(['subsonic', 'addalbum'], [1, 0, 0, \&cliSubsonicPlayAlbum]);
+	# "Local Artwork" requires LMS 7.8+, as it's using its imageproxy.
+	if (CAN_IMAGEPROXY) {
+		require Slim::Web::ImageProxy;
+		Slim::Web::ImageProxy->registerHandler(
+			match => qr/$regexUrl/,
+			func  => \&_imgProxy,
+		);
+	}
 
 	$class->SUPER::initPlugin(
 		feed   => \&handleFeed,
@@ -266,5 +267,27 @@ sub _trackItem {
 		playall		=> 1,
 	};
 }
+
+sub _imgProxy { if (CAN_IMAGEPROXY) {
+	my ($url, $spec) = @_;
+
+	main::DEBUGLOG && $log->debug("Artwork for $url, $spec");
+
+	my $size = Slim::Web::ImageProxy->getRightSize($spec, {
+		50 => '&size=50',
+		100 => '&size=100',
+		200 => '&size=200',
+		300 => '&size=300',
+		400 => '&size=400',
+		500 => '&size=500',
+		600 => '&size=600'
+	}) || '';
+
+	$url = $url . $size;
+
+	main::DEBUGLOG && $log->debug("Artwork file url is '$url'");
+
+	return $url;
+} }
 
 1;
