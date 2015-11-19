@@ -90,36 +90,17 @@ sub fetchMetadata {
 	my $uri = URI->new($url);
   my %query = $uri->query_form;
 
-	# SN URL to fetch track info menu
-	my $metaUrl = $prefs->get('baseurl') . 'rest/getSong.view' . '?u=' . $prefs->get('username') . '&t=' . $prefs->get('passtoken') . '&s=' . $prefs->get('salt') . '&v=1.13.0&c=squeezebox&f=json&id=' . $query{'id'};
+	main::DEBUGLOG && $log->is_debug && $log->debug( "Fetching Subsonic metadata for id $query{'id'}" );
 
-	main::DEBUGLOG && $log->is_debug && $log->debug( "Fetching Subsonic metadata from $metaUrl" );
+	Plugins::Subsonic::API->gettrackInfo( sub {
+		my $info = shift;
+		_gotMetadata($info, $client, $url);
+	}, $query{'id'} )
 
-	my $http = Slim::Networking::SimpleAsyncHTTP->new(
-		\&_gotMetadata,
-		\&_gotMetadataError,
-		{
-			client     => $client,
-			url        => $url,
-			timeout    => 30,
-		},
-	);
-
-	$http->get( $metaUrl );
 }
 
 sub _gotMetadata {
-	my $http   = shift;
-	my $client = $http->params('client');
-	my $url    = $http->params('url');
-
-	my $feed = eval { from_json( $http->content ) };
-
-	if ( $@ ) {
-		$http->error( $@ );
-		_gotMetadataError( $http );
-		return;
-	}
+	my ($feed, $client, $url) = @_;
 
 	if ( main::DEBUGLOG && $log->is_debug ) {
 		$log->debug( "Raw Subsonic metadata: " . Data::Dump::dump($feed) );
