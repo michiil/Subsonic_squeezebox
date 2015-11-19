@@ -18,15 +18,15 @@ use constant ICON       => 'plugins/Subsonic/html/images/subsonic.png';
 
 sub init {
 	my $class = shift;
-  my $baseurl = quotemeta($prefs->get('baseurl'));
+	my $regexUrl = quotemeta($prefs->get('baseurl'));
 
 	Slim::Formats::RemoteMetadata->registerProvider(
-		match => qr/$baseurl/,
+		match => qr/$regexUrl/,
 		func  => \&provider,
 	);
 
   Slim::Formats::RemoteMetadata->registerParser(
-    match => qr/$baseurl/,
+    match => qr/$regexUrl/,
     func  => \&parser,
   );
 
