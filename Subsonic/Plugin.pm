@@ -12,7 +12,7 @@ use Slim::Utils::Strings qw(string cstring);
 use Plugins::Subsonic::API;
 
 my $prefs = preferences('plugin.subsonic');
-my $regexUrl = quotemeta($prefs->get('baseurl'));
+my $regexCoverUrl = quotemeta($prefs->get('baseurl') . 'rest/getCoverArt.view');
 my $log = Slim::Utils::Log->addLogCategory( {
 	category     => 'plugin.subsonic',
 	defaultLevel => 'ERROR',
@@ -34,7 +34,7 @@ sub initPlugin {
 	if (CAN_IMAGEPROXY) {
 		require Slim::Web::ImageProxy;
 		Slim::Web::ImageProxy->registerHandler(
-			match => qr/$regexUrl/,
+			match => qr/$regexCoverUrl/,
 			func  => \&_imgProxy,
 		);
 	}
