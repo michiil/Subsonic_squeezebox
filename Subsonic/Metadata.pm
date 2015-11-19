@@ -140,37 +140,10 @@ sub _gotMetadata {
 	);
 }
 
-sub _gotMetadataError {
-	my $http   = shift;
-	my $client = $http->params('client');
-	my $url    = $http->params('url');
-	my $error  = $http->error;
-
-	main::DEBUGLOG && $log->is_debug && $log->debug( "Error fetching Subsonic metadata: $error" );
-
-	$client->master->pluginData( fetchingMeta => 0 );
-
-	# To avoid flooding the RT servers in the case of errors, we just ignore further
-	# metadata for this station if we get an error
-	my $meta = defaultMeta( $client, $url );
-	$meta->{_url} = $url;
-
-	$client->master->pluginData( metadata => $meta );
-
-	Slim::Control::Request::notifyFromArray( $client, [ 'newmetadata' ] );
-
-	Slim::Utils::Timers::setTimer(
-		$client,
-		$meta->{ttl},
-		\&fetchMetadata,
-		$url,
-	);
-}
-
 sub parser {
     my ( $client, $url, $metadata ) = @_;
 		if ( main::DEBUGLOG && $log->is_debug ) {
-			$log->debug( "Parser wird gerufen" );
+			$log->debug( "Parser is called" );
 		}
     return 1;
 }
